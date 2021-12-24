@@ -5,15 +5,15 @@ import (
 	"log"
 	"net/http"
 
-	"github.com/gorilla/mux"
+	"github.com/go-chi/chi/v5"
 )
 
 func hello(w http.ResponseWriter, r *http.Request) {
-	fmt.Fprint(w, "Hello World - Gorilla Mux")
+	fmt.Fprint(w, "Hello World - Chi")
 }
 
 func main() {
-	router := mux.NewRouter()
+	router := chi.NewRouter()
 	router.HandleFunc("/hello", hello)
 	log.Fatal(http.ListenAndServe(":5000", router))
 }
