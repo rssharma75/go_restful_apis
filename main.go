@@ -18,6 +18,10 @@ func home(w http.ResponseWriter, r *http.Request) {
 	w.Write([]byte("Home"))
 }
 
+func (s *server) home(w http.ResponseWriter, r *http.Request) {
+	w.Write([]byte("Welcome Home"))
+}
+
 func main() {
 	s := &server{}
 	d := dog(10)
@@ -25,7 +29,7 @@ func main() {
 	http.Handle("/", s)
 	http.Handle("/dog/", d)
 
-	http.HandleFunc("/home", home)
+	http.HandleFunc("/home", s.home)
 
 	http.ListenAndServe(":7999", nil)
 }
