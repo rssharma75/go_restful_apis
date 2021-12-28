@@ -287,15 +287,16 @@ func main() {
 	fmt.Println(intersect(courses, courses3))
 
 	e := echo.New()
-	e.GET("/users", getAllUsers)
-	e.GET("/users/:id", getUserById)
-	e.POST("/users", addUser)
-	e.PUT("/user/:id", updateUser)
+	v1 := e.Group("/api/v1")
+	v1.GET("/users", getAllUsers)
+	v1.GET("/users/:id", getUserById)
+	v1.POST("/users", addUser)
+	v1.PUT("/user/:id", updateUser)
 
-	e.GET("/instructors", getAllInstructors)
-	e.GET("/instructor/:id", getInstructorsById)
-	e.POST("/instructors", addInstructor)
-	e.PUT("/instructors/:id", updateInstructor)
+	v1.GET("/instructors", getAllInstructors)
+	v1.GET("/instructor/:id", getInstructorsById)
+	v1.POST("/instructors", addInstructor)
+	v1.PUT("/instructors/:id", updateInstructor)
 
 	e.Logger.Fatal(e.Start(":5000"))
 	// s := &server{
