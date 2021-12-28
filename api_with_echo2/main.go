@@ -9,6 +9,7 @@ import (
 	"os"
 
 	"github.com/labstack/echo/v4"
+	"github.com/labstack/echo/v4/middleware"
 )
 
 var (
@@ -77,14 +78,14 @@ func intersect(setA []string, setB []string) (bool, []string) {
 }
 
 func getAllUsers(c echo.Context) error {
-	var interests string
+	interests := []string{}
 	var _users []User
-	if err := echo.QueryParamsBinder(c).String("interests", &interests).BindError(); err != nil {
+	if err := echo.QueryParamsBinder(c).Strings("interest", &interests).BindError(); err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, "Invalid interests ")
 	}
 
 	for _, v := range users {
-		if contains(v.Interests, interests) {
+		if e, _ := intersect(v.Interests, interests); e == true {
 			_users = append(_users, v)
 		}
 	}
@@ -114,15 +115,15 @@ func getUserById(c echo.Context) error {
 }
 
 func getAllInstructors(c echo.Context) error {
-	var course string
+	courses := []string{}
 	var _instructors []Instructor
 
-	if err := echo.QueryParamsBinder(c).String("course", &course).BindError(); err != nil {
+	if err := echo.QueryParamsBinder(c).Strings("course", &courses).BindError(); err != nil {
 		echo.NewHTTPError(http.StatusBadRequest, "Invalid course passed in")
 	}
 
 	for _, v := range instructors {
-		if contains(v.Expertise, course) {
+		if e, _ := intersect(v.Expertise, courses); e == true {
 			_instructors = append(_instructors, v)
 		}
 	}
@@ -277,6 +278,13 @@ type Course struct {
 
 // }
 
+func Logger(next echo.HandlerFunc) echo.HandlerFunc {
+	return func(c echo.Context) error {
+		fmt.Println("==========Logging Middleware==============")
+		log.Print(c.Request().URL)
+		return next(c)
+	}
+}
 func main() {
 	courses := []string{"math", "science", "english"}
 	courses3 := []string{"english", "chem", "science"}
@@ -287,6 +295,8 @@ func main() {
 	fmt.Println(intersect(courses, courses3))
 
 	e := echo.New()
+	specialLogger := middleware.LoggerWithConfig(middleware.LoggerConfig{Format: "time=${timerfc3339 method= ${method}, URI:${uri}, Status=${status}"})
+	e.Use(Logger, specialLogger) // need this call to use the middlewares, can use multuple middlewares
 	v1 := e.Group("/api/v1")
 	v1.GET("/users", getAllUsers)
 	v1.GET("/users/:id", getUserById)
